@@ -2,6 +2,35 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
+
+
+# Custom
+*.idea/
+.collabignore
+[Oo]bj/
+[Bb]uild
+sysinfo.txt
+*.stackdump
+[Ee]xported[Oo]bj/
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.DotSettings
+*.user
+*.unityproj
+*.booproj
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+[Tt]humbs.db
+[Dd]esktop.ini
+
+
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
