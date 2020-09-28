@@ -1,12 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using RSide = RubickSide.RSide;
 
 public class SidesController : MonoBehaviour
 {
+    public bool resetSidesRequired;
+    public bool updateRequired;
     public bool isAnyRotating;
     
     [SerializeField] private RotateSpeeds sideRotateSpeed = RotateSpeeds.Small;
+    [SerializeField] private float shuffleStepsMax = 10;
+    [SerializeField] private float shuffleStepsMin = 5;
     private Dictionary<GameObject, (Vector3 pos, Quaternion rot)> _rubickStartStateData;
     private Queue<(RotationType, RSide)> _rotationCommands;
     private List<RubickSide> _sides;
@@ -25,39 +31,28 @@ public class SidesController : MonoBehaviour
         Insta = 9
     }
     
-    public void UpdateSidesData()
-    {
-        foreach (var side in _sides)
-        {
-            side.UpdateSideData();
-            if (side.boundCubes.Count < 9)
-                Debug.LogWarning(side.gameObject.name + " has less than 9 cubes.");
-        }
-    }
-    
-    public void AddRotationToQueue((RotationType rotType, RSide side) command)
+    public void AddRotationToQueue((RotationType, RSide) command)
     {
         _rotationCommands.Enqueue(command);
     }
-    
-    public void ResetRubick()
+
+    public void StopRotating()
     {
-        if (isAnyRotating) return;
+        _rotationCommands.Clear();
+    }
+
+    public void ShuffleSides()
+    {
+        var typesCount = Enum.GetNames(typeof(RotationType)).Length;
+        var sidesCount = Enum.GetNames(typeof(RSide)).Length;
         
-        foreach (var side in _sides)
-        {
-            foreach (var cube in side.boundCubes)
-            {
-                cube.transform.position = _rubickStartStateData[cube].pos;
-                cube.transform.rotation = _rubickStartStateData[cube].rot;
-            }
-        }
-        UpdateSidesData();
+        for (var i = 0; i < Random.Range(shuffleStepsMin, shuffleStepsMax); i++)
+            AddRotationToQueue(((RotationType) Random.Range(0, typesCount), (RSide) Random.Range(0, sidesCount)));
     }
 
     private void Start()
     {
-        _rubickStartStateData = new Dictionary<GameObject, (Vector3 pos, Quaternion rot)>();
+        _rubickStartStateData = new Dictionary<GameObject, (Vector3, Quaternion)>();
         _rotationCommands = new Queue<(RotationType, RSide)>();
         _sides = new List<RubickSide>
         {
@@ -68,22 +63,49 @@ public class SidesController : MonoBehaviour
             GameObject.Find("CenterYellow").GetComponent<RubickSide>(),     //Up -- 4
             GameObject.Find("CenterOrange").GetComponent<RubickSide>()      //Back -- 5
         };
+        updateRequired = true;
         SaveRubickStartState();
-        UpdateSidesData();
     }
 
-    private void Update()
-    { 
-        // if (Input.GetKeyDown(KeyCode.Space))
-            // ResetRubick();
-    }
-    
     private void FixedUpdate()
     {
+        UpdateSidesData();
         ProceedRotationStep();
         ExecuteNextRotationCommand();
+        ResetSides();
+    }
+    
+    private void UpdateSidesData()
+    {
+        if (!updateRequired) return;
+        
+        foreach (var side in _sides)
+        {
+            side.UpdateSideData();
+            if (side.boundCubes.Count < 9)
+                Debug.LogWarning(side.gameObject.name + " has less than 9 cubes.");
+        }
+
+        updateRequired = false;
     }
 
+    private void ResetSides()
+    {
+        if (isAnyRotating || !resetSidesRequired) return;
+        
+        foreach (var side in _sides)
+        {
+            foreach (var cube in side.boundCubes)
+            {
+                cube.transform.position = _rubickStartStateData[cube].pos;
+                cube.transform.rotation = _rubickStartStateData[cube].rot;
+            }
+        }
+
+        resetSidesRequired = false;
+        updateRequired = true;
+    }
+    
     private void ExecuteNextRotationCommand()
     {
         if (isAnyRotating || _rotationCommands.Count == 0)
@@ -121,7 +143,7 @@ public class SidesController : MonoBehaviour
         {
             isAnyRotating = false;
             _currentRotSide = null;
-            UpdateSidesData();
+            updateRequired = true;
         }
     }
 

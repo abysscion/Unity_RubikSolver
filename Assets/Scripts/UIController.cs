@@ -2,10 +2,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIController : MonoBehaviour
+public partial class UIController : MonoBehaviour
 { 
     private readonly Regex _inputFieldFilter = new Regex(@"^[FBRLUD][2']?(?:(?:(\s[FBRLUD][2']?)+$)|$)");
+    [SerializeField] private GameObject shuffleButtonObj;
     [SerializeField] private GameObject launchButtonObj;
+    [SerializeField] private GameObject resetButtonObj;
+    [SerializeField] private GameObject solveButtonObj;
+    [SerializeField] private GameObject stopButtonObj;
     [SerializeField] private GameObject inputFieldObj;
     [SerializeField] private GameObject rubickObj;
     [SerializeField] private Color inputFieldStartColor = Color.white;
@@ -13,53 +17,42 @@ public class UIController : MonoBehaviour
     [SerializeField] private Color inputFieldCorrectColor = new Color(0.0f, 1.0f, 0.0f, 0.5f);
     private SidesController _sidesController;
     private InputField _inputField;
+    private Button _shuffleButton;
     private Button _launchButton;
+    private Button _resetButton;
+    private Button _solveButton;
+    private Button _stopButton;
     private bool _inputIsValid;
-
-    public void InputField_OnValueChanged()
-    {
-        if (string.IsNullOrEmpty(_inputField.text))
-        {
-            _inputField.image.color = inputFieldStartColor;
-            return;
-        }
-
-        if (_inputFieldFilter.IsMatch(_inputField.text))
-        {
-            _inputField.image.color = inputFieldCorrectColor;
-            _launchButton.interactable = true;
-        }
-        else
-        {
-            _inputField.image.color = inputFieldWrongColor;
-            _launchButton.interactable = false;
-        }
-    }
-
-    public void InputFiled_OnEndEdit()
-    {
-    }
     
-    public void LaunchButton_OnClick()
-    {
-        foreach (var command in _inputField.text.Split(' '))
-            _sidesController.AddRotationToQueue(Util.TextToRotationCommand(command));
-        _inputField.image.color = inputFieldStartColor;
-        _inputField.text = string.Empty;
-        _launchButton.interactable = false;
-    }
-
     private void Start()
     {
-        _inputField = inputFieldObj
-            ? inputFieldObj.GetComponent<InputField>()
-            : GameObject.Find("InputField").GetComponent<InputField>();
+        _shuffleButton = shuffleButtonObj
+            ? shuffleButtonObj.GetComponent<Button>()
+            : GameObject.Find("ShuffleButton").GetComponent<Button>();
         _launchButton = launchButtonObj
             ? launchButtonObj.GetComponent<Button>()
             : GameObject.Find("LaunchButton").GetComponent<Button>();
+        _resetButton = resetButtonObj
+            ? resetButtonObj.GetComponent<Button>()
+            : GameObject.Find("ResetButton").GetComponent<Button>();
+        _solveButton = solveButtonObj
+            ? solveButtonObj.GetComponent<Button>()
+            : GameObject.Find("SolveButton").GetComponent<Button>();
+        _stopButton = stopButtonObj
+            ? stopButtonObj.GetComponent<Button>()
+            : GameObject.Find("StopButton").GetComponent<Button>();
+        _inputField = inputFieldObj
+            ? inputFieldObj.GetComponent<InputField>()
+            : GameObject.Find("InputField").GetComponent<InputField>();
         _sidesController = rubickObj
             ? rubickObj.GetComponent<SidesController>()
             : GameObject.Find("Rubick").GetComponent<SidesController>();
         _launchButton.interactable = false;
+        _solveButton.interactable = false;
+    }
+
+    private void Update()
+    {
+        _stopButton.interactable = _sidesController.isAnyRotating;
     }
 }

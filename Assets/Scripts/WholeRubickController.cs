@@ -25,7 +25,7 @@ public class WholeRubickController : MonoBehaviour
     {
         if (Input.GetMouseButton(0) || _sController.isAnyRotating) return;
         if (Input.GetMouseButtonUp(1))
-            _sController.UpdateSidesData();
+            _sController.updateRequired = true;
         if (!Input.GetMouseButton(1)) return;
 
         var horizontalVec = Vector3.right - Vector3.forward;
