@@ -1,4 +1,4 @@
-public enum RColor
+public enum RubickColor
 {
     Error = -1,
     Red = 0,

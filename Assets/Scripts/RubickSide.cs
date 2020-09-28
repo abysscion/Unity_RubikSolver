@@ -4,9 +4,10 @@ using UnityEngine;
 public class RubickSide : MonoBehaviour
 {
     public List<GameObject> boundCubes;
-    public List<RColor> faces;
-    public GameObject rubickCenter;
+    public List<RubickColor> faces;
     public Vector3 orientation;
+    
+    [SerializeField] private GameObject rubickCenter;
     
     public enum RSide
     {
@@ -55,7 +56,7 @@ public class RubickSide : MonoBehaviour
         if (!rubickCenter)
             rubickCenter = GameObject.Find("CenterCube");
         boundCubes = new List<GameObject>();
-        faces = new List<RColor>();
+        faces = new List<RubickColor>();
         
         UpdateSideData();
     }

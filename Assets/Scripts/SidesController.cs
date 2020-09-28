@@ -4,17 +4,18 @@ using RSide = RubickSide.RSide;
 
 public class SidesController : MonoBehaviour
 {
-    public List<RubickSide> sides;
     public bool isAnyRotating;
+    
     [SerializeField] private RotateSpeeds sideRotateSpeed = RotateSpeeds.Small;
     private Dictionary<GameObject, (Vector3 pos, Quaternion rot)> _rubickStartStateData;
+    private Queue<(RotationType, RSide)> _rotationCommands;
+    private List<RubickSide> _sides;
     private RubickSide _currentRotSide;
     private RubickSide _selectedSide;
     private Vector3 _mousePosOnClick;
     private float _targetAngle;
     private bool _isRotationClockwise;
     private int _rotationStepsRemain;
-
 
     private enum RotateSpeeds
     {
@@ -26,7 +27,7 @@ public class SidesController : MonoBehaviour
     
     public void UpdateSidesData()
     {
-        foreach (var side in sides)
+        foreach (var side in _sides)
         {
             side.UpdateSideData();
             if (side.boundCubes.Count < 9)
@@ -34,11 +35,16 @@ public class SidesController : MonoBehaviour
         }
     }
     
+    public void AddRotationToQueue((RotationType rotType, RSide side) command)
+    {
+        _rotationCommands.Enqueue(command);
+    }
+    
     public void ResetRubick()
     {
         if (isAnyRotating) return;
         
-        foreach (var side in sides)
+        foreach (var side in _sides)
         {
             foreach (var cube in side.boundCubes)
             {
@@ -52,7 +58,8 @@ public class SidesController : MonoBehaviour
     private void Start()
     {
         _rubickStartStateData = new Dictionary<GameObject, (Vector3 pos, Quaternion rot)>();
-        sides = new List<RubickSide>
+        _rotationCommands = new Queue<(RotationType, RSide)>();
+        _sides = new List<RubickSide>
         {
             GameObject.Find("CenterRed").GetComponent<RubickSide>(),        //Front -- 0
             GameObject.Find("CenterBlue").GetComponent<RubickSide>(),       //Left -- 1
@@ -66,63 +73,41 @@ public class SidesController : MonoBehaviour
     }
 
     private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            RotateSideBy90(RSide.Front, true);
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
-            RotateSideBy90(RSide.Left, false);
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
-            RotateSideBy90(RSide.Up, true);
-        else if (Input.GetKeyDown(KeyCode.A))
-            RotateSideBy90(RSide.Down, false); 
-        else if (Input.GetKeyDown(KeyCode.W))
-            RotateSideBy90(RSide.Right, true); 
-        else if (Input.GetKeyDown(KeyCode.D))
-            RotateSideBy90(RSide.Back, false);
-        else if (Input.GetKeyDown(KeyCode.Keypad4))
-            RotateSideBy180(RSide.Left);
-        else if (Input.GetKeyDown(KeyCode.Keypad6))
-            RotateSideBy180(RSide.Right);
-        else if (Input.GetKeyDown(KeyCode.Keypad2))
-            RotateSideBy180(RSide.Front);
-        else if (Input.GetKeyDown(KeyCode.Keypad8))
-            RotateSideBy180(RSide.Back);
-        else if (Input.GetKeyDown(KeyCode.Keypad3))
-            RotateSideBy180(RSide.Down);
-        else if (Input.GetKeyDown(KeyCode.Keypad7))
-            RotateSideBy180(RSide.Up);
-        else if (Input.GetKeyDown(KeyCode.Space))
-            ResetRubick();
+    { 
+        // if (Input.GetKeyDown(KeyCode.Space))
+            // ResetRubick();
     }
     
     private void FixedUpdate()
     {
-        if (isAnyRotating)
-            ProceedRotationStep();
+        ProceedRotationStep();
+        ExecuteNextRotationCommand();
     }
 
-    private void RotateSideBy180(RSide target)
+    private void ExecuteNextRotationCommand()
+    {
+        if (isAnyRotating || _rotationCommands.Count == 0)
+            return;
+        
+        RotateSide(_rotationCommands.Dequeue());
+    }
+
+    private void RotateSide((RotationType, RSide) command)
     {
         if (isAnyRotating) return;
 
-        _currentRotSide = sides[(int)target];
-        _isRotationClockwise = true;
-        _rotationStepsRemain = 180 / (5 * (int)sideRotateSpeed);
+        var (type, side) = command;
+        var turnAngle = type == RotationType.Halfturn ? 180 : 90;
+        _currentRotSide = _sides[(int)side];
+        _isRotationClockwise = type != RotationType.CounterClockwise;
+        _rotationStepsRemain = turnAngle / (5 * (int) sideRotateSpeed);
         isAnyRotating = true;
     }
-    
-    private void RotateSideBy90(RSide target, bool clockwise)
-    {
-        if (isAnyRotating) return;
 
-        _currentRotSide = sides[(int)target];
-        _isRotationClockwise = clockwise;
-        _rotationStepsRemain = 90 / (5 * (int)sideRotateSpeed);
-        isAnyRotating = true;
-    }
-    
     private void ProceedRotationStep()
     {
+        if (!isAnyRotating)
+            return;
         if (_rotationStepsRemain > 0)
         {
             _rotationStepsRemain--;
@@ -145,7 +130,7 @@ public class SidesController : MonoBehaviour
         if (isAnyRotating) return;
         
         _rubickStartStateData.Clear();
-        foreach (var side in sides)
+        foreach (var side in _sides)
         {
             foreach (var cube in side.boundCubes)
             {
@@ -155,6 +140,7 @@ public class SidesController : MonoBehaviour
         }
     }
 
+    
     //TODO: someday it could be made
     /*
     private void HandleSideDrag()

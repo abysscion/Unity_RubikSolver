@@ -2,8 +2,8 @@
 
 public class WholeRubickController : MonoBehaviour
 {
-    public float zoomFactor = 2f;
-    public float rotateSpeed = 1f;
+    [SerializeField] private float zoomFactor = 2f;
+    [SerializeField] private float rotateSpeed = 1f;
     private readonly Vector3 _minZoom = new Vector3(-38f, 30.9f, -38f);
     private readonly Vector3 _maxZoom = new Vector3(-6f, 4.8f, -6f);
     private SidesController _sController;
