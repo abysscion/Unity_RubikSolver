@@ -21,7 +21,6 @@ namespace Controllers
         private SidesController _sidesController;
         private InputField _outputField;
         private InputField _inputField;
-        private Button _closeOutputPanelButton;
         private Button _shuffleButton;
         private Button _launchButton;
         private Button _resetButton;
@@ -55,7 +54,6 @@ namespace Controllers
             _sidesController = rubikObj
                 ? rubikObj.GetComponent<SidesController>()
                 : GameObject.Find("Rubick").GetComponent<SidesController>();
-            _closeOutputPanelButton = outputPanelObj.GetComponentInChildren<Button>();
             _outputField = outputPanelObj.GetComponentInChildren<InputField>();
             _launchButton.interactable = false;
             outputPanelObj.SetActive(false);
@@ -63,7 +61,22 @@ namespace Controllers
 
         private void Update()
         {
-            _stopButton.interactable = _sidesController.isAnyRotating;
+            if (_sidesController.isAnyRotating)
+            {
+                _stopButton.interactable = true;
+                _launchButton.interactable = false;
+                _resetButton.interactable = false;
+                _solveButton.interactable = false;
+                _shuffleButton.interactable = false;
+            }
+            else
+            {
+                _stopButton.interactable = false;
+                _launchButton.interactable = true;
+                _resetButton.interactable = true;
+                _solveButton.interactable = true;
+                _shuffleButton.interactable = true;
+            }
         }
     }
 }
