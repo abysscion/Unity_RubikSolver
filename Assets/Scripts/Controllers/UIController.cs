@@ -64,7 +64,6 @@ namespace Controllers
             if (_sidesController.isAnyRotating)
             {
                 _stopButton.interactable = true;
-                _launchButton.interactable = false;
                 _resetButton.interactable = false;
                 _solveButton.interactable = false;
                 _shuffleButton.interactable = false;
@@ -72,7 +71,6 @@ namespace Controllers
             else
             {
                 _stopButton.interactable = false;
-                _launchButton.interactable = true;
                 _resetButton.interactable = true;
                 _solveButton.interactable = true;
                 _shuffleButton.interactable = true;

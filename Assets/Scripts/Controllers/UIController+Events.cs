@@ -41,6 +41,7 @@ namespace Controllers
                 _sidesController.AddRotationToQueue(Util.Tools.TextToRotationCommand(command));
             _inputField.image.color = inputFieldStartColor;
             _inputField.text = string.Empty;
+            _launchButton.interactable = false;
         }
 
         public void SolveButton_OnClick()
