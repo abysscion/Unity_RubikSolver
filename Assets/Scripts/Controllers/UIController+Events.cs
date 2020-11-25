@@ -1,5 +1,4 @@
-﻿using System;
-using Solver;
+﻿using Solver;
 using Util;
 
 namespace Controllers
@@ -11,6 +10,7 @@ namespace Controllers
             if (string.IsNullOrEmpty(_inputField.text))
             {
                 _inputField.image.color = inputFieldStartColor;
+                _launchButton.interactable = false;
                 return;
             }
 
@@ -26,10 +26,6 @@ namespace Controllers
             }
         }
 
-        public void InputFiled_OnEndEdit()
-        {
-        }
-    
         public void ShuffleButton_OnClick()
         {
             _sidesController.ShuffleSides();

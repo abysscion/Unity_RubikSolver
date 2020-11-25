@@ -6,6 +6,8 @@
 
 # Custom
 *.idea/
+Packages/
+UserSettings/
 .collabignore
 [Oo]bj/
 [Bb]uild
