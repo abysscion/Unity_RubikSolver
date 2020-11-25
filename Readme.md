@@ -11,7 +11,7 @@ Program uses FRUBLD world-wide notation, familiarize yourself if needed: [link](
 Enter sequence in left lower input field. If sequence is valid (for example: "D2 U' U' R L") field will be colored in green and button "Launch" will be active. After clicking on launch button, sequence will be executed. Now, clicking on "Solve" button will show solution for this mix in left upper corner. You able to copy and paste this solution in input field to launch it and check if solution is correct :)
 Alternatively you able to simply press shuffle button to apply random rotations and then solve mixed cube.
 
-![Example2](/Images/example2.gif)
+![Example1](/Images/example1.gif)
 
 ## Features
 
